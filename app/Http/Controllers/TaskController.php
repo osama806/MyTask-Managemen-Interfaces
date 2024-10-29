@@ -11,6 +11,7 @@ use App\Traits\ResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Cache;
 
 class TaskController extends Controller
 {
@@ -28,7 +29,10 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::where('created_by', auth()->user()->id)->get();
+        $tasks = Cache::remember('tasks', 3600, function () {
+            return Task::where('created_by', auth()->user()->id)->get();
+        });
+
         $data = [
             'tasks' => $tasks,
         ];
